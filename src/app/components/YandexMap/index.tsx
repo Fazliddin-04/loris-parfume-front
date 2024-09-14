@@ -1,5 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
-import { YMaps, Map, GeolocationControl } from '@pbe/react-yandex-maps'
+import {
+  YMaps,
+  Map,
+  GeolocationControl,
+  ZoomControl,
+} from '@pbe/react-yandex-maps'
 import axios from 'axios'
 import { Box } from '@chakra-ui/react'
 import Marker from './Marker'
@@ -28,7 +33,7 @@ const YandexMap: React.FC<YandexMapProps> = ({ onLocationChange }) => {
     }, 2000)
   }
 
-  const getAddress = async (coords: number[]) => {
+  const getAddress = async (coords: [number, number]) => {
     try {
       const response = await axios.get(
         `https://geocode-maps.yandex.ru/1.x/?apikey=${
@@ -52,7 +57,7 @@ const YandexMap: React.FC<YandexMapProps> = ({ onLocationChange }) => {
         onLocationChange({
           address: geoObject?.name,
           city,
-          location: [coords[1], coords[0]],
+          location: coords,
         })
       }
     } catch (error: any) {
@@ -77,6 +82,7 @@ const YandexMap: React.FC<YandexMapProps> = ({ onLocationChange }) => {
             suppressMapOpenBlock: true,
           }}
         >
+          <ZoomControl />
           <GeolocationControl />
         </Map>
       </YMaps>

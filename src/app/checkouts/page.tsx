@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar'
 import { message } from 'antd' // Import message for feedback
-import { Spinner } from '@chakra-ui/react' // Use Chakra UI Spinner for loading
+import { Box, HStack, Spinner } from '@chakra-ui/react' // Use Chakra UI Spinner for loading
 
 // Importing icons
 import CashIcon from '../../../public/cash-icon.svg'
@@ -56,7 +56,6 @@ export default function Checkout() {
   const [filteredPaymentOptions, setFilteredPaymentOptions] =
     useState(allPaymentOptions)
 
-  const [isDelivery, setDelivery] = useState<boolean>(true)
   const [deliveryData, setDeliveryData] = useState<{
     distance: number
     deliverySum: number
@@ -174,15 +173,16 @@ export default function Checkout() {
       branchId: branchId ?? 0,
       address: data.address,
       addressLocationLink: `https://yandex.uz/maps/?ll=${coords[1]}%2C${coords[0]}`,
-      distance: 5.0,
+      distance: deliveryData?.distance,
       phone: data.phone,
       comment: data.comment,
-      isDelivery: data.deliveryType === 'Доставка',
+      // isDelivery: data.deliveryType === 'Доставка',
+      isDelivery: true,
       isSoonDeliveryTime: false,
       scheduledDeliveryTime: new Date().toISOString(),
       longitude: coords[1] || 0.0,
       latitude: coords[0] || 0.0,
-      deliverySum: 0.0,
+      deliverySum: deliveryData?.deliverySum,
       totalSum: totalSum(),
       paymentType: data.paymentType.toLowerCase(),
       returnUrl: '/',
@@ -216,13 +216,13 @@ export default function Checkout() {
               className="flex flex-col gap-4"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <CustomDropdown
+              {/* <CustomDropdown
                 name="deliveryType"
                 options={deliveryOptions}
                 title="Тип доставки"
                 control={control}
                 onChange={handleDeliveryChange}
-              />
+              /> */}
               <YandexMap onLocationChange={onLocationChange} />
 
               <CustomInput
@@ -284,7 +284,7 @@ export default function Checkout() {
                   <Spinner size="lg" color="#87754f" /> {/* Loading Spinner */}
                 </div>
               ) : (
-                cart.map((cartItem, index) => {
+                cart?.map((cartItem, index) => {
                   const discountPrice = cartItem.discountPercent
                     ? cartItem.price -
                       (cartItem.price * cartItem.discountPercent) / 100
@@ -301,12 +301,22 @@ export default function Checkout() {
                   )
                 })
               )}
-              <div className="w-full flex flex-col gap-2">
-                <div className="flex flex-row justify-between text-base md:text-[19px] font-semibold text-[#454545]">
-                  <p>Total</p>
-                  <p>UZS {totalSum().toFixed(2)} сум</p>{' '}
-                </div>
-              </div>
+              <Box fontSize={{ md: '20px' }} color="#454545">
+                <HStack justify="space-between">
+                  <p>Товары</p>
+                  <p>{totalSum().toFixed(2)} сум</p>{' '}
+                </HStack>
+                <HStack justify="space-between" my={5}>
+                  <p>Доставка</p>
+                  <p>{deliveryData?.deliverySum} сум</p>{' '}
+                </HStack>
+                <HStack justify="space-between" fontWeight={600}>
+                  <p>К оплате</p>
+                  <p>
+                    {(totalSum() + deliveryData?.deliverySum).toFixed(2)} сум
+                  </p>{' '}
+                </HStack>
+              </Box>
             </div>
           </div>
         </div>
